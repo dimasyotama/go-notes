@@ -3,7 +3,7 @@ package noteHandler
 import (
 	"github.com/dimasyotama/go-notes/database"
 	"github.com/dimasyotama/go-notes/internal/model"
-	"github.com/dimasyotama/go-notes/model"
+	// "github.com/dimasyotama/go-notes/model"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
@@ -28,16 +28,18 @@ func CreateNotes(c *fiber.Ctx) error {
 	db := database.DB
 	note := new(model.Note)
 
-	err := c.BodyParser(note)
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map("status":"error","message": "Review your input", "data": err))
-	}
-
-	note.ID = uuid.New()
-	err := db.Create(&note).Error
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map("status":"error", "message":"Couldn't create a note", "data": err))
-	}
+	// Store the body in the note and return error if encountered
+    err := c.BodyParser(note)
+    if err != nil {
+        return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Review your input", "data": err})
+    }
+    // Add a uuid to the note
+    note.ID = uuid.New()
+    // Create the Note and return error if encountered
+    err = db.Create(&note).Error
+    if err != nil {
+        return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Could not create note", "data": err})
+    }
 	
 	return c.JSON(fiber.Map{"status": "success", "message": "Created Note", "data": note})
 }
@@ -50,10 +52,10 @@ func GetNotebyId(c *fiber.Ctx) error {
 	db.Find(&note, "id = ?", id)
 
 	if note.ID == uuid.Nil {
-		return c.Status(400).JSON(fiber.Map("status":"error", "message":"No Note Available", "data":nil))
+		return c.Status(400).JSON(fiber.Map{"status":"error", "message":"No Note Available", "data":nil})
 	}
 
-	return c.JSON(fiber.Map("status":"success", "message":"Notes Found", "data": note))
+	return c.JSON(fiber.Map{"status":"success", "message":"Notes Found", "data": note})
 }
 
 func UpdateNote(c *fiber.Ctx) error {
@@ -70,7 +72,7 @@ func UpdateNote(c *fiber.Ctx) error {
 	db.Find(&note, "id = ?", id)
 
 	if note.ID == uuid.Nil {
-		return c.Status(404).JSON(fiber.Map("status":"error", "message": "Data not found", "data": nil))
+		return c.Status(404).JSON(fiber.Map{"status":"error", "message": "Data not found", "data": nil})
 	}
 
 	var updateNoteData updateNote

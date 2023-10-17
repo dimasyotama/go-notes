@@ -1,9 +1,11 @@
 package noteHandler
 
 import (
+	"encoding/json"
+	"context"
 	"github.com/dimasyotama/go-notes/database"
 	"github.com/dimasyotama/go-notes/internal/model"
-	// "github.com/dimasyotama/go-notes/model"
+	"github.com/dimasyotama/go-notes/redis"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
@@ -11,17 +13,41 @@ import (
 func GetNotes(c *fiber.Ctx) error {
     db := database.DB
     var notes []model.Note
+	redis_connect := redis.ConnectRedis()
+	key := "go-notes:getall"
 
     // find all notes in the database
     db.Find(&notes)
 
-    // If no note is present return an error
+	// If no note is present return an error
     if len(notes) == 0 {
         return c.Status(404).JSON(fiber.Map{"status": "error", "message": "No notes present", "data": nil})
     }
 
-    // Else return notes
-    return c.JSON(fiber.Map{"status": "success", "message": "Notes Found", "data": notes})
+	cached_notes, _ := redis_connect.Get(context.Background(), key).Result()
+
+	if cached_notes != "" {
+        if err := json.Unmarshal([]byte(cached_notes), &notes); err != nil {
+            return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Error unmarshalling cached notes", "data": nil})
+        }
+    } else {
+        // Notes were not found in the cache, fetch from the database
+        db.Find(&notes)
+
+        // Store notes in the Redis cache for future requests
+        notes_json, err := json.Marshal(notes)
+        if err != nil {
+            return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Error marshalling notes", "data": nil})
+        }
+        err = redis_connect.Set(context.Background(), key, notes_json, 0).Err()
+        if err != nil {
+            return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Error caching notes", "data": nil})
+        }
+    }
+
+	return c.JSON(fiber.Map{"status": "success", "message": "Notes Found", "data": notes})
+
+    
 }
 
 func CreateNotes(c *fiber.Ctx) error {

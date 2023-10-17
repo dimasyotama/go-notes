@@ -1,8 +1,10 @@
 package noteHandler
 
 import (
-	"encoding/json"
 	"context"
+	"encoding/json"
+	"fmt"
+
 	"github.com/dimasyotama/go-notes/database"
 	"github.com/dimasyotama/go-notes/internal/model"
 	"github.com/dimasyotama/go-notes/redis"
@@ -76,12 +78,39 @@ func GetNotebyId(c *fiber.Ctx) error {
 	db := database.DB
 	var note model.Note
 
+	redis_connect := redis.ConnectRedis() //connect into redis
+
 	id := c.Params("noteId")
 	db.Find(&note, "id = ?", id)
+
+	key := fmt.Sprintf("%s:%s", "go-notes:get-by-id", id) 
+
 
 	if note.ID == uuid.Nil {
 		return c.Status(400).JSON(fiber.Map{"status":"error", "message":"No Note Available", "data":nil})
 	}
+
+	cached_notes, _ := redis_connect.Get(context.Background(), key).Result()
+
+	//if note are found in cache, unmarshall the JSON Data
+	if cached_notes != "" {
+        if err := json.Unmarshal([]byte(cached_notes), &note); err != nil {
+            return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Error unmarshalling cached notes", "data": nil})
+        }
+    } else {
+        // Note were not found in the cache, fetch from the database
+        db.Find(&note)
+
+        // Store note in the Redis cache for future requests
+        notes_json, err := json.Marshal(note)
+        if err != nil {
+            return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Error marshalling notes", "data": nil})
+        }
+        err = redis_connect.Set(context.Background(), key, notes_json, 0).Err()
+        if err != nil {
+            return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Error caching notes", "data": nil})
+        }
+    }
 
 	return c.JSON(fiber.Map{"status":"success", "message":"Notes Found", "data": note})
 }

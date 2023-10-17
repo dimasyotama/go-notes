@@ -25,14 +25,15 @@ func GetNotes(c *fiber.Ctx) error {
 }
 
 func CreateNotes(c *fiber.Ctx) error {
-	db := database.DB
-	note := new(model.Note)
+    db := database.DB
+    note := new(model.Note)
 
-	// Store the body in the note and return error if encountered
+    // Store the body in the note and return error if encountered
     err := c.BodyParser(note)
     if err != nil {
         return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Review your input", "data": err})
     }
+	
     // Add a uuid to the note
     note.ID = uuid.New()
     // Create the Note and return error if encountered
@@ -40,8 +41,9 @@ func CreateNotes(c *fiber.Ctx) error {
     if err != nil {
         return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Could not create note", "data": err})
     }
-	
-	return c.JSON(fiber.Map{"status": "success", "message": "Created Note", "data": note})
+
+    // Return the created note
+    return c.JSON(fiber.Map{"status": "success", "message": "Created Note", "data": note})
 }
 
 func GetNotebyId(c *fiber.Ctx) error {
@@ -91,7 +93,7 @@ func UpdateNote(c *fiber.Ctx) error {
 }
 
 
-func DeletNote(c *fiber.Ctx) error{
+func DeleteNote(c *fiber.Ctx) error{
 	db := database.DB
 	var note model.Note
 

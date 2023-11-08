@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/dimasyotama/go-notes/config"
-	"github.com/dimasyotama/go-notes/internal/model"
+	"github.com/dimasyotama/go-notes/api/model"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )

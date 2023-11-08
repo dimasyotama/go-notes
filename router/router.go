@@ -3,7 +3,7 @@ package router
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/dimasyotama/go-notes/internal/routes/note"
+	"github.com/dimasyotama/go-notes/api/routes/note"
 )
 
 func SetupRoutes(app *fiber.App){

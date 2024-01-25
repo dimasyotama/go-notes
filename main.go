@@ -7,22 +7,24 @@ import (
 	"github.com/dimasyotama/go-notes/router"
 	"github.com/gofiber/fiber/v2"
 	"github.com/dimasyotama/go-notes/middleware/logger"
+	"github.com/dimasyotama/go-notes/config"
 )
 
-func main(){
-	// Start a new fiber app
-	app := fiber.New()
+	func main(){
+		// Start a new fiber app
+		app := fiber.New()
 
-	app.Use(ratelimiter.RateLimiter())
-	app.Use(logger.CustomLogger)
+		app.Use(ratelimiter.RateLimiter())
+		app.Use(logger.CustomLogger)
 
-	database.ConnectDB()
-	redis.ConnectRedis()
-
-
-	router.SetupRoutes(app)
+		database.ConnectDB()
+		redis.ConnectRedis()
 
 
-	// Listen on PORT 1090
-	app.Listen(":1090")
-}
+		router.SetupRoutes(app)
+
+
+		// Listen on PORT
+		port := config.Config("PORT")
+		app.Listen(":" + port)
+	}

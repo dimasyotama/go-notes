@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  app:
+    container_name: go_notes_container
+    # Replace this with the configuration for your actual application
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - "5060:5060"
+    env_file:
+      - .env
+  
+  postgres:
+    image: postgres:latest
+    container_name: postgres_container
+    ports:
+      - "5430:5432"
+    environment:
+      POSTGRES_USER: ###YOUR  USER
+      POSTGRES_PASSWORD: #YOUR PASSWORD
+      POSTGRES_NAME: #YOUR NAME
+
+  redis:
+    image: redis:latest
+    container_name: redis_container
+    ports:
+      - "6378:6379"

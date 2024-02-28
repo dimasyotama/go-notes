@@ -2,7 +2,7 @@ package noteRoutes
 
 import (
 	"github.com/gofiber/fiber/v2"
-	noteHandler "github.com/dimasyotama/go-notes/internal/handler/note"
+	noteHandler "github.com/dimasyotama/go-notes/api/handler/note"
 )
 func SetupNoteRoutes(router fiber.Router){
 	note := router.Group("/note")

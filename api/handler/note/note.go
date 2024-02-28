@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/dimasyotama/go-notes/database"
-	"github.com/dimasyotama/go-notes/internal/model"
+	"github.com/dimasyotama/go-notes/api/model"
 	"github.com/dimasyotama/go-notes/redis"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"

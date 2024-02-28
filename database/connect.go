@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/dimasyotama/go-notes/config"
-	"github.com/dimasyotama/go-notes/api/model"
+	// "github.com/dimasyotama/go-notes/api/model"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -32,6 +32,7 @@ func ConnectDB(){
 		log.Panic("failed to connect database")
 	}
 	fmt.Println("Connection Open to Database")
-	DB.AutoMigrate(&model.Note{})
-	fmt.Println("Database Migrated")
+	//these line if you first migrating database
+	// DB.AutoMigrate(&model.Note{})
+	// fmt.Println("Database Migrated")
 }
